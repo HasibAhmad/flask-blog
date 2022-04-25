@@ -1,7 +1,7 @@
 body {
   background: #fafafa;
   color: #333333;
-  margin-top: 5rem;
+  margin-top: 6rem;
 }
 
 a {
@@ -97,4 +97,5 @@ a.article-title:hover {
 
 .active-account {
   padding: 0;
+  margin: 0;
 }
