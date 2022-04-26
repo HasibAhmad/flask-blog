@@ -1,12 +1,18 @@
 {% extends "layout.html" %}
 {% block content %}
     <article class="media content-section d-flex flex-row">
-        <img src="{{ url_for('static', filename='profile_pics/' + post.author.image_file) }}" alt=""
-            class="rounded-circle account-img">
+        
         <div class="media-body">
-            <div class="article-metadata">
-                <a class="mr-2" href="{{ url_for('user_posts', username=post.author.username) }}">{{ post.author.username }}</a>
-                <small class="text-muted">{{ post.date_posted.strftime('%Y-%m-%d') }}</small>
+            <div class="article-metadata d-flex justify-content-between">
+                <div class="d-flex">
+                    <img src="{{ url_for('static', filename='profile_pics/' + post.author.image_file) }}" alt=""
+                        class="rounded-circle account-img">
+                    <div>
+                        <a class="d-block" mr-2" href="{{ url_for('user_posts', username=post.author.username) }}">{{ post.author.username }}</a>
+                        <small class="d-block text-muted">Posted on {{ post.date_posted.strftime('%Y-%m-%d') }}</small>                    
+                    </div>
+                </div>
+                
                 {% if post.author == current_user %}
                     <div>
                         <a href="{{ url_for('update_post', post_id=post.id) }}" class="btn btn-outline-secondary btn-sm">
@@ -18,21 +24,27 @@
                     </div>
                 {% endif %}
             </div>
+            
             <h2 class="article-title">{{ post.title }}</h2>
-            <h6 class="article-title">{{ post.description }}</h6>
-            {% if post.image_file %}
-                <img class="" src="{{ url_for('static', filename='profile_pics/' + post.image_file) }}" alt="">
-            {% endif %}
+            <small class="article-title text-muted">{{ post.description }}</small>
+            
+            <div class="card  my-2">
+                {% if post.image_file %}
+                    <img class="card-img-top" src="{{ url_for('static', filename='profile_pics/' + post.image_file) }}" alt="">
+                {% endif %}
+            </div>
+            
             <p class="article-content">{{ post.content }}</p>
+
             {% if current_user.is_authenticated %}
                 {% if current_user.has_liked_post(post) %}
-                    <a class="btn btn-outline-success" href="{{ url_for('like_action', post_id=post.id, action='unlike') }}">
+                    <a class="btn btn-outline-secondary likes-buttons" href="{{ url_for('like_action', post_id=post.id, action='unlike') }}">
                         <i class="bi bi-heart-fill">
                             {{ post.likes.count() }} likes
                         </i>
                     </a>
                 {% else %}
-                    <a class="btn btn-outline-success" href="{{ url_for('like_action', post_id=post.id, action='like') }}">
+                    <a class="btn btn-outline-secondary likes-buttons" href="{{ url_for('like_action', post_id=post.id, action='like') }}">
                         <i class="bi bi-heart">
                             {{ post.likes.count() }} likes
                         </i>

@@ -1,39 +1,75 @@
 {% extends "layout.html" %}
 {% block content %}
-    {% for post in posts.items %} 
-        <article class="media content-section">
-            <div class="d-flex flex-row">
-                <img src="{{ url_for('static', filename='profile_pics/' + post.author.image_file) }}" alt="" class="rounded-circle account-img">
-                <div class="media-body">
-                    <div class="article-metadata">
-                        <a class="mr-2" href="{{ url_for('user_posts', username=post.author.username) }}">{{ post.author.username }}</a>
-                        <small class="text-muted">{{ post.date_posted.strftime('%Y-%m-%d') }}</small>
-                    </div>
-                    <h2><a class="article-title" href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></h2>
-                    <p class="article-content">{{ post.content }}</p>
+{% if posts.items %}
+{% for post in posts.items %}
+<article class="media content-section">
+    <div class="media-body">
+        <div class="article-metadata d-flex justify-content-between">
+            <div class="d-flex">
+                <img src="{{ url_for('static', filename='profile_pics/' + post.author.image_file) }}" alt=""
+                    class="rounded-circle account-img">
+                <div>
+                    <a class="d-block" mr-2" href="{{ url_for('user_posts', username=post.author.username) }}">{{
+                        post.author.username }}</a>
+                    <small class="d-block text-muted">Posted on {{ post.date_posted.strftime('%Y-%m-%d') }}</small>
                 </div>
             </div>
+
             {% if current_user.is_admin == True %}
-                <form action="{{ url_for('approve_post', post_id=post.id) }}" method="post">
+            <form action="{{ url_for('approve_post', post_id=post.id) }}" method="post">
+            <div>
                     <input type="submit" class="btn btn-outline-danger" value="approve">
-                </form>
+                    <button type="button" class="btn btn-outline-danger m-1" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                        Delete
+                    </button>
+                </div>
+            </form>
+            
             {% endif %}
-        </article>
-    {% endfor %}
-    {% for page_num in posts.iter_pages(
-        left_edge=1,
-        right_edge=1,
-        left_current=1,
-        right_current=2
-    ) %} 
-        {% if page_num %}
-            {% if posts.page == page_num %}
-                <a class="btn btn-info mb-4" href="{{ url_for('approvals', page=page_num) }}"> {{ page_num }}</a>
-            {% else %}
-                <a class="btn btn-outline-info mb-4" href="{{ url_for('approvals', page=page_num) }}"> {{ page_num }}</a>
-            {% endif %}
-        {% else %}
-            ...   
-        {% endif %}
-    {% endfor %}
+        </div>
+        <h2><a class="article-title" href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></h2>
+        <p class="article-content">{{ post.content }}</p>
+    </div>
+</article>
+
+<!-- Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel"
+aria-hidden="true">
+<div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="deleteModalLabel">Delete Post</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <form action="{{ url_for('delete_post', post_id=post.id) }}" method="post">
+                <input type="submit" class="btn btn-outline-danger" value="Delete">
+            </form>
+        </div>
+    </div>
+</div>
+</div>
+{% endfor %}
+{% else %}
+<p>No post to approve...</p>
+{% endif %}
+{% for page_num in posts.iter_pages(
+left_edge=1,
+right_edge=1,
+left_current=1,
+right_current=2
+) %}
+{% if page_num %}
+{% if posts.page == page_num %}
+<a class="btn btn-info mb-4" href="{{ url_for('approvals', page=page_num) }}"> {{ page_num }}</a>
+{% else %}
+<a class="btn btn-outline-info mb-4" href="{{ url_for('approvals', page=page_num) }}"> {{ page_num }}</a>
+{% endif %}
+{% else %}
+...
+{% endif %}
+{% endfor %}
 {% endblock %}
