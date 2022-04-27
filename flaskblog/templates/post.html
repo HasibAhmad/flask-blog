@@ -18,6 +18,7 @@
                         <a href="{{ url_for('update_post', post_id=post.id) }}" class="btn btn-outline-secondary btn-sm">
                             Update
                         </a>
+                        
                         <button type="button" class="btn btn-outline-danger btn-sm m-1" data-bs-toggle="modal" data-bs-target="#deleteModal">
                             Delete
                         </button>
@@ -54,7 +55,7 @@
         </div>
     </article>
 
-    <!-- Modal -->
+    <!-- Delete post model -->
     <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel"
         aria-hidden="true">
         <div class="modal-dialog" role="document">
