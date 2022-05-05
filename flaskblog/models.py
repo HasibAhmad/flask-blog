@@ -15,11 +15,7 @@ class User(db.Model, UserMixin):
     posts = db.relationship('Post', backref='author', lazy=True)
     is_admin = db.Column(db.Boolean, nullable=False, default=False)
     is_blogger = db.Column(db.Boolean, nullable=False, default=False)
-    
-    liked = db.relationship(
-        'PostLike',
-        foreign_keys='PostLike.user_id',
-        backref='user', lazy='dynamic')
+    liked = db.relationship('PostLike', foreign_keys='PostLike.user_id', backref='user', lazy='dynamic')
 
     def like_post(self, post):
         if not self.has_liked_post(post):

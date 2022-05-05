@@ -10,6 +10,10 @@ nav {
   border-radius: 3px;
 }
 
+.logo {
+  width: 2.5rem;
+}
+
 a {
   text-decoration: none;
 }
