@@ -1,8 +1,7 @@
 import secrets
 import os
-from tkinter.tix import Tree
-from PIL import Image
 from fileinput import filename
+from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from flaskblog import app, db, bcrypt
 from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm
@@ -94,6 +93,24 @@ def account():
             current_user.image_file = picture_file
         current_user.username = form.username.data
         current_user.email = form.email.data
+
+        if form.new_password.data and form.confirm_password.data:
+            if form.new_password.data == form.confirm_password.data:
+                if form.password.data:
+                    old_password = form.password.data
+                    if bcrypt.check_password_hash(current_user.password, old_password):
+                        new_hashed_password = bcrypt.generate_password_hash(form.new_password.data).decode('utf-8')
+                        user = User.query.get(current_user.id)
+                        user.password = new_hashed_password
+                        db.session.commit()
+                        flash('Password changed successfully!', 'success')
+                        return redirect(url_for('login'))
+                    else:
+                        flash('Old password is not correct', 'danger')
+                        return redirect(url_for('account'))
+            else:
+                flash('New password and Confirm Password doesnt match!', 'danger')
+                return redirect(url_for('account'))
         db.session.commit()
         flash('your account has been updated!', 'success')
         return redirect(url_for('account'))
@@ -144,6 +161,9 @@ def update_post(post_id):
         abort(403)
     form = PostForm()
     if form.validate_on_submit():
+        if form.picture.data:
+            picture_file = save_post_picture(form.picture.data)
+            post.image_file = picture_file
         post.title = form.title.data
         post.description = form.description.data
         post.content = form.content.data
