@@ -12,9 +12,9 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(120), unique=True, nullable=False)
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     password = db.Column(db.String(60), nullable=False)
-    posts = db.relationship('Post', backref='author', lazy=True)
     is_admin = db.Column(db.Boolean, nullable=False, default=False)
     is_blogger = db.Column(db.Boolean, nullable=False, default=False)
+    posts = db.relationship('Post', backref='author', lazy=True)
     liked = db.relationship('PostLike', foreign_keys='PostLike.user_id', backref='user', lazy='dynamic')
 
     def like_post(self, post):
@@ -51,7 +51,6 @@ class Post(db.Model):
         return f"User('{self.title}', '{self.date_posted}')"
 
 class PostLike(db.Model):
-    # __tablename__ = 'post_like'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'))

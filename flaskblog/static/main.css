@@ -10,12 +10,14 @@ nav {
   border-radius: 3px;
 }
 
-.logo {
+.account-picture {
   width: 2.5rem;
 }
 
 a {
   text-decoration: none;
+  color:#000000;
+  font-weight: 500;
 }
 
 h1,
@@ -32,11 +34,11 @@ h6 {
 }
 
 .site-header .navbar-nav .nav-link {
-  color: #000000;
+  color: #00000080;
 }
 
 .site-header .navbar-nav .nav-link:hover {
-  color: #428bca;
+  color: #000000;
 }
 
 .site-header .navbar-nav .nav-link.active {
@@ -61,7 +63,7 @@ h6 {
 }
 
 a.article-title:hover {
-  color: #428bca;
+  color: #000000;
   text-decoration: none;
 }
 
@@ -99,11 +101,14 @@ a.article-title:hover {
   margin-bottom: 16px;
 }
 
+.account_profile {
+  height: 120px;
+  width: 120px;
+}
+
 .active-account-img {
   height: 45px;
   width: 45px;
-  /* margin-right: 20px;
-  margin-bottom: 16px; */
 }
 
 .account-heading {
@@ -115,6 +120,11 @@ a.article-title:hover {
   margin: 0;
 }
 
-.likes-buttons {
+.buttons {
   border: none;
+}
+
+.btn-outline-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active, .open>.dropdown-toggle.btn-primary {
+    color: rgb(70, 0, 255);
+    background-color: #eff0f3;
 }

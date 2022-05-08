@@ -32,12 +32,12 @@ class RegistrationForm(FlaskForm):
     def validate_username(self, username):
         user = User.query.filter_by(username=username.data).first()
         if user:
-            raise ValidationError('username already take!')
+            raise ValidationError('username is already taken!')
 
     def validate_email(self, email):
         user = User.query.filter_by(email=email.data).first()
         if user:
-            raise ValidationError('email already take!')
+            raise ValidationError('email is already taken!')
 
 
 class LoginForm(FlaskForm):
@@ -89,6 +89,5 @@ class PostForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     description = TextAreaField('Description', validators=[DataRequired()])
     content = TextAreaField('Content', validators=[DataRequired()])
-    picture = FileField('add a picture', validators=[
-                        FileAllowed(['jpg', 'png'])])
+    picture = FileField('Add a picture', validators=[FileAllowed(['jpg', 'png'])])
     submit = SubmitField('Post')

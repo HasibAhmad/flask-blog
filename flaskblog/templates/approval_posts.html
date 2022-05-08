@@ -1,75 +1,85 @@
 {% extends "layout.html" %}
 {% block content %}
-{% if posts.items %}
-{% for post in posts.items %}
-<article class="media content-section">
-    <div class="media-body">
-        <div class="article-metadata d-flex justify-content-between">
-            <div class="d-flex">
-                <img src="{{ url_for('static', filename='profile_pics/' + post.author.image_file) }}" alt=""
-                    class="rounded-circle account-img">
-                <div>
-                    <a class="d-block" mr-2" href="{{ url_for('user_posts', username=post.author.username) }}">{{
-                        post.author.username }}</a>
-                    <small class="d-block text-muted">Posted on {{ post.date_posted.strftime('%Y-%m-%d') }}</small>
+    {% if posts.items %}
+        {% for post in posts.items %}
+        <article class="media content-section">
+            <div class="media-body">
+                <div class="article-metadata d-flex justify-content-between mt-2">
+                    <div class="d-flex">
+                        <img src="{{ url_for('static', filename='profile_pics/' + post.author.image_file) }}" alt=""
+                            class="rounded-circle account-img">
+                        
+                        <div>
+                            <a class="d-block" mr-2" href="{{ url_for('user_posts', username=post.author.username) }}">{{
+                                post.author.username }}
+                            </a>
+                            
+                            <small class="d-block text-muted"> {{ post.date_posted.strftime('%B %d, %Y') }} </small>
+                        </div>
+                    </div>
+
+                    {% if current_user.is_admin == True %}
+                        <form action="{{ url_for('approve_post', post_id=post.id) }}" method="post">
+                            <div>
+                                <button type="submit" class="btn btn-outline-primary buttons mt-2"">
+                                    <i class="bi bi-check2-square">
+                                        Approve
+                                    </i>
+                                </button>
+                                
+                                <button type="button" class="btn btn-outline-primary buttons mt-2" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                    <i class="bi bi-trash">
+                                        Delete
+                                    </i>
+                                </button>
+                            </div>
+                        </form>
+                    {% endif %}
+                </div>
+                
+                <h2>
+                    <a class="article-title" href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a>
+                </h2>
+                
+                <p class="article-content">{{ post.content }}</p>
+            </div>
+        </article>
+
+            <!-- Delete Post Modal -->
+            <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel"
+            aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteModalLabel">Delete Post</h5>
+                        </div>
+
+                        <div class="modal-body">
+                            <p> Are you sure you want to delete this post? </p>
+                        </div>
+                        
+                        <div class="modal-footer">
+                            <form action="{{ url_for('delete_post', post_id=post.id) }}" method="post">
+                                <input type="submit" class="btn btn-outline-secondary" value="Delete">
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            {% if current_user.is_admin == True %}
-            <form action="{{ url_for('approve_post', post_id=post.id) }}" method="post">
-            <div>
-                    <input type="submit" class="btn btn-outline-danger" value="approve">
-                    <button type="button" class="btn btn-outline-danger m-1" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                        Delete
-                    </button>
-                </div>
-            </form>
-            
+        {% endfor %}
+    {% else %}
+        <p>No post to approve...</p>
+    {% endif %}
+    
+    {% for page_num in posts.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+        {% if page_num %}
+            {% if posts.page == page_num %}
+                <a class="btn btn-primary mb-4" href="{{ url_for('approvals', page=page_num) }}">{{ page_num }}</a>
+            {% else %}
+                <a class="btn btn-outline-primary mb-4" href="{{ url_for('approvals', page=page_num) }}">{{ page_num }}</a>
             {% endif %}
-        </div>
-        <h2><a class="article-title" href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></h2>
-        <p class="article-content">{{ post.content }}</p>
-    </div>
-</article>
-
-<!-- Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel"
-aria-hidden="true">
-<div class="modal-dialog" role="document">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title" id="deleteModalLabel">Delete Post</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <form action="{{ url_for('delete_post', post_id=post.id) }}" method="post">
-                <input type="submit" class="btn btn-outline-danger" value="Delete">
-            </form>
-        </div>
-    </div>
-</div>
-</div>
-{% endfor %}
-{% else %}
-<p>No post to approve...</p>
-{% endif %}
-{% for page_num in posts.iter_pages(
-left_edge=1,
-right_edge=1,
-left_current=1,
-right_current=2
-) %}
-{% if page_num %}
-{% if posts.page == page_num %}
-<a class="btn btn-info mb-4" href="{{ url_for('approvals', page=page_num) }}"> {{ page_num }}</a>
-{% else %}
-<a class="btn btn-outline-info mb-4" href="{{ url_for('approvals', page=page_num) }}"> {{ page_num }}</a>
-{% endif %}
-{% else %}
-...
-{% endif %}
-{% endfor %}
+        {% else %}
+            ...
+        {% endif %}
+    {% endfor %}
 {% endblock %}
