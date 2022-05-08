@@ -152,6 +152,10 @@ def update_post(post_id):
     form = PostForm()
     if form.validate_on_submit():
         if form.picture.data:
+            # to remove already stored photo from the post later..
+            if post.image_file:
+                pictures_path = os.path.join(app.root_path, 'static/posts_pictures', post.image_file)
+                os.remove(pictures_path)
             picture_file = save_post_picture(form.picture.data)
             post.image_file = picture_file
         post.title = form.title.data
@@ -174,6 +178,9 @@ def delete_post(post_id):
     post = Post.query.get_or_404(post_id)
     if post.author != current_user:
         abort(403)
+    if post.image_file:
+        pictures_path = os.path.join(app.root_path, 'static/posts_pictures', post.image_file)
+        os.remove(pictures_path)
     db.session.delete(post)
     db.session.commit()
     flash('Your post has been deleted!', 'success')
