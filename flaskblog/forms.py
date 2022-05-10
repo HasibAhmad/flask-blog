@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
-from wtforms.validators import DataRequired, Length, EqualTo, Email, ValidationError
+from wtforms.validators import DataRequired, Length, EqualTo, Email, ValidationError, Regexp, Optional
 from flaskblog.models import User
 
 
@@ -10,7 +10,8 @@ class RegistrationForm(FlaskForm):
     username = StringField('Username',
                            validators=[
                                DataRequired(),
-                               Length(min=2, max=20)
+                               Length(min=2, max=20),
+                               Regexp('^\w+$', message="Username must contain only letters, numbers or underscore"),
                            ])
     email = StringField('Email',
                         validators=[
@@ -19,12 +20,17 @@ class RegistrationForm(FlaskForm):
                         ])
     password = PasswordField('Password',
                              validators=[
-                                 DataRequired()
+                                 DataRequired(),
+                                 Length(min=8, max=32),
+                                 Regexp(".*[a-z].*", message="password should contain lowercase"),
+                                 Regexp(".*[A-Z].*", message="password should contain uppercase"),
+                                 Regexp(".*[0-9].*", message="password should contain digit"),
+                                 Regexp(".*?[!@#\$&*~].*", message="password should contain one symbol at least")
                              ])
     confirm_password = PasswordField('Confirm Password',
                                      validators=[
                                          DataRequired(),
-                                         EqualTo('password')
+                                         EqualTo('password', message="Confirm Password must be equal to Password")
                                      ])
     is_blogger = BooleanField('I am a blogger')
     submit = SubmitField('Sign Up')
@@ -66,10 +72,21 @@ class UpdateAccountForm(FlaskForm):
                             Email()
                         ])
     password = PasswordField('Password')
-    new_password = PasswordField('New Password')
-    confirm_password = PasswordField('Confirm Password')
+    new_password = PasswordField('New Password', 
+                                    validators=[
+                                        Optional(),
+                                        Length(min=8, max=32),
+                                        Regexp(".*[a-z].*", message="password should contain lowercase"),
+                                        Regexp(".*[A-Z].*", message="password should contain uppercase"),
+                                        Regexp(".*[0-9].*", message="password should contain digit"),
+                                        Regexp(".*?[!@#\$&*~].*", message="password should contain one symbol at least")
+                                    ])
+    confirm_password = PasswordField('Confirm Password',
+                                        validators=[
+                                            EqualTo('new_password', message="Confirm Password must be equal to New Password")
+                                        ])
     picture = FileField('Update Profile Picture', validators=[
-                        FileAllowed(['jpg', 'png'])])
+                        FileAllowed(['jpg', 'jpeg', 'png', 'webp'])])
     submit = SubmitField('Update')
 
     def validate_username(self, username):
@@ -83,11 +100,19 @@ class UpdateAccountForm(FlaskForm):
             user = User.query.filter_by(email=email.data).first()
             if user:
                 raise ValidationError('email already take!')
-
+    
+    def validate_password(self, password):
+        if password.data == '' and self.new_password.data != '':
+            raise ValidationError('Enter Password also to change password')
+        if password.data != '' and self.new_password.data == '':
+            raise ValidationError('Enter New Password also to change password or leave Password blank')
 
 class PostForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     description = TextAreaField('Description', validators=[DataRequired()])
     content = TextAreaField('Content', validators=[DataRequired()])
-    picture = FileField('Add a picture', validators=[FileAllowed(['jpg', 'png'])])
+    picture = FileField('Add a picture', validators=[FileAllowed(['jpg', 'jpeg', 'png', 'webp', 'jfif'])])
     submit = SubmitField('Post')
+
+class SearchPostForm(FlaskForm):
+    search_term = StringField('Search Term', render_kw={"placeholder": "search posts by title"})

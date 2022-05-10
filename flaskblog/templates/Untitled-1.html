@@ -1,0 +1,28 @@
+html
+                        <!-- <form class="d-flex nav-item nav-link m-0" action="{{ url_for('search_posts') }}" method="post">
+                            {{ searchPostForm.hidden_tag() }}
+                            <fieldset class="form-group">
+                                        {{ searchPostForm.search_term(class="form-control form-control-sm") }}
+                            </fieldset>
+                        </form> -->
+
+route
+
+@app.route("/")
+@app.route("/home")
+def home():
+    page = request.args.get('page', 1, type=int)
+    posts = Post.query.filter_by(is_approved=True).order_by(Post.date_posted.desc()).paginate(page=page, per_page=5)
+    
+    searchPostForm = SearchPostForm()
+    return render_template('home.html', posts=posts, searchPostForm=searchPostForm)
+    
+@app.route("/search_posts", methods=['GET', 'POST'])
+@login_required
+def search_posts():
+    searchPostForm = SearchPostForm()
+    if searchPostForm.validate_on_submit():
+        page = request.args.get('page', 1, type=int)
+        posts = Post.query.filter(Post.title.like(searchPostForm.search_term.data)).order_by(Post.date_posted.desc()).paginate(page=page, per_page=5)
+
+    return render_template('home.html', posts=posts, searchPostForm=searchPostForm)

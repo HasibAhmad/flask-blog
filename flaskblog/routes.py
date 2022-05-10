@@ -4,7 +4,7 @@ from fileinput import filename
 from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from flaskblog import app, db, bcrypt
-from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm
+from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm, SearchPostForm
 from flaskblog.models import User, Post, PostLike
 from flask_login import login_user, current_user, logout_user, login_required
 
@@ -20,7 +20,7 @@ def register():
             user.is_blogger = True
         db.session.add(user)
         db.session.commit()
-        flash('your account is created', 'success')
+        flash('Your account has been created successfully!', 'success')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
 
@@ -47,15 +47,19 @@ def logout():
 def save_profile_picture(form_picture):
     random_hex = secrets.token_hex(8)
     _, f_ext = os.path.splitext(form_picture.filename)
-    picture_fn = random_hex + f_ext
-    picture_path = os.path.join(app.root_path, 'static/profile_pics', picture_fn)
+    picture_filename = random_hex + f_ext
+    picture_path = os.path.join(app.root_path, 'static/profile_pics', picture_filename)
     
     output_size = (125, 125)
-    i = Image.open(form_picture)
-    i.thumbnail(output_size)
-    i.save(picture_path)
+    picture = Image.open(form_picture)
+    
+    # The thumbnail method modifies the
+    # image to contain a thumbnail version of itself, no larger than
+    # the given size.
+    picture.thumbnail(output_size)
+    picture.save(picture_path)
 
-    return picture_fn
+    return picture_filename
 
 @app.route("/account", methods=['GET', 'POST'])
 @login_required
@@ -68,31 +72,34 @@ def account():
         current_user.username = form.username.data
         current_user.email = form.email.data
 
-        if form.new_password.data and form.confirm_password.data:
+        if form.new_password.data or form.confirm_password.data:
             if form.new_password.data == form.confirm_password.data:
                 if form.password.data:
                     old_password = form.password.data
                     if bcrypt.check_password_hash(current_user.password, old_password):
                         new_hashed_password = bcrypt.generate_password_hash(form.new_password.data).decode('utf-8')
-                        user = User.query.get(current_user.id)
-                        user.password = new_hashed_password
+                        current_user.password = new_hashed_password
                         db.session.commit()
+                        logout_user()
                         flash('Password changed successfully!', 'success')
                         return redirect(url_for('login'))
                     else:
                         flash('Old password is not correct', 'danger')
                         return redirect(url_for('account'))
+                else:
+                    flash('Please enter your old password', 'danger')
+                    return redirect(url_for('account'))
             else:
                 flash('New password and Confirm Password doesnt match!', 'danger')
                 return redirect(url_for('account'))
         db.session.commit()
-        flash('your account has been updated!', 'success')
+        flash('Your account has been updated!', 'success')
         return redirect(url_for('account'))
     elif request.method == 'GET':
         form.username.data = current_user.username
         form.email.data = current_user.email
-    image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
-    return render_template('account.html', title='Account', image_file=image_file, form=form)
+    user_avatar = url_for('static', filename='profile_pics/' + current_user.image_file)
+    return render_template('account.html', title='Account', user_avatar=user_avatar, form=form)
 
 @app.route("/")
 @app.route("/home")
@@ -113,24 +120,23 @@ def user_posts(username):
 def save_post_picture(form_picture):
     random_hex = secrets.token_hex(8)
     _, f_ext = os.path.splitext(form_picture.filename)
-    picture_fn = random_hex + f_ext
-    picture_path = os.path.join(app.root_path, 'static/posts_pictures', picture_fn)
+    picture_filename = random_hex + f_ext
+    picture_path = os.path.join(app.root_path, 'static/posts_pictures', picture_filename)
     
-    i = Image.open(form_picture)
-    i.save(picture_path)
+    picture = Image.open(form_picture)
+    picture.save(picture_path)
 
-    return picture_fn
+    return picture_filename
 
 @app.route("/post/new", methods=['GET', 'POST'])
 @login_required
 def new_post():
     form = PostForm()
     if form.validate_on_submit():
+        post = Post(title=form.title.data, content=form.content.data, description=form.description.data, author=current_user)
         if form.picture.data:
             picture_file = save_post_picture(form.picture.data)
-            post = Post(title=form.title.data, content=form.content.data, description=form.description.data, image_file=picture_file, author=current_user)
-        else:
-            post = Post(title=form.title.data, content=form.content.data, description=form.description.data, author=current_user)
+            post.image_file = picture_file
         db.session.add(post)
         db.session.commit()
         flash('Your post has been created!', 'success')
@@ -151,11 +157,9 @@ def update_post(post_id):
         abort(403)
     form = PostForm()
     if form.validate_on_submit():
-        if form.picture.data:
-            # to remove already stored photo from the post later..
-            if post.image_file:
-                pictures_path = os.path.join(app.root_path, 'static/posts_pictures', post.image_file)
-                os.remove(pictures_path)
+        if form.picture.data and post.image_file:
+            pictures_path = os.path.join(app.root_path, 'static/posts_pictures', post.image_file)
+            os.remove(pictures_path)
             picture_file = save_post_picture(form.picture.data)
             post.image_file = picture_file
         post.title = form.title.data
@@ -176,7 +180,7 @@ def update_post(post_id):
 @login_required
 def delete_post(post_id):
     post = Post.query.get_or_404(post_id)
-    if post.author != current_user:
+    if post.author != current_user and current_user.is_admin != True:
         abort(403)
     if post.image_file:
         pictures_path = os.path.join(app.root_path, 'static/posts_pictures', post.image_file)
@@ -203,14 +207,15 @@ def approve_post(post_id):
     flash('Post has been approved!', 'success')
     return redirect(url_for('approvals'))
 
-@app.route('/like/<int:post_id>/<action>')
+@app.route('/like/<int:post_id>/<reaction>')
 @login_required
-def like_action(post_id, action):
+def react_to_post(post_id, reaction):
     post = Post.query.filter_by(id=post_id).first_or_404()
-    if action == 'like':
+    if reaction == 'like':
         current_user.like_post(post)
         db.session.commit()
-    if action == 'unlike':
+    if reaction == 'unlike':
         current_user.unlike_post(post)
         db.session.commit()
     return redirect(request.referrer)
+

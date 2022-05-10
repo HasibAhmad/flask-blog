@@ -3,7 +3,7 @@
     <div class="content-section">
         <div class="media d-flex justify-content-center">
             <div>
-                <img class="rounded-circle account_profile" src="{{ image_file }}">
+                <img class="rounded-circle account_profile" src="{{ user_avatar }}">
             
             </div>
         </div>
@@ -11,7 +11,9 @@
         <form action="" method="post" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
             <fieldset class="form-group">
-                <legend class="border-bottm mb-4"> Account Details </legend>
+                <legend class="border-bottm lead mb-2"> 
+                    Account Details 
+                </legend>
                 
                 <div class="form-group mb-2">
                     {{ form.username.label(class="form-control-label") }}
@@ -48,6 +50,10 @@
                     {% endif %}
                 </div>
                 
+                <p class="lead mt-4 mb-2">
+                    To change your password enter your current password and new password below.
+                </p>
+
                 <div class="form-group mb-2">
                     {{ form.password.label(class="form-control-label") }}
                     {% if form.password.errors %}
@@ -57,7 +63,7 @@
                             {% for error in form.password.errors %}
                                 <span>
                                     {{ error }}
-                                </span>
+                                </span><br>
                             {% endfor %}
                         </div>
                     {% else %}
@@ -101,7 +107,7 @@
                 
                 <div class="form-group mb-2">
                     <div>
-                        {{ form.picture.label() }}
+                        {{ form.picture.label(class="lead my-2") }}
                     </div>
                     
                     {{ form.picture(class="form-control-file") }}
