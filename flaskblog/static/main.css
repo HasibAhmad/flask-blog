@@ -1,7 +1,7 @@
 body {
   background: #fafafa;
   color: #333333;
-  margin-top: 5rem;
+  margin-top: 4.438rem;
 }
 
 nav {
@@ -45,7 +45,7 @@ h6 {
   font-weight: 500;
 }
 
-.col-md-9 .content-section {
+.col-md-6 .content-section {
   background: #ffffff;
   padding: 10px 20px;
   border: 1px solid #dddddd;
@@ -108,8 +108,8 @@ a.article-title:hover {
 .account-img {
   height: 50px;
   width: 50px;
-  margin-right: 20px;
-  margin-bottom: 16px;
+  margin-right: 10px;
+  margin-bottom: 10px;
 }
 
 .account_profile {
@@ -138,4 +138,55 @@ a.article-title:hover {
 .btn-outline-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active, .open>.dropdown-toggle.btn-primary {
     color: rgb(70, 0, 255);
     background-color: #eff0f3;
+}
+
+.alert {
+  padding-top: 21px;
+  height: 70px;
+}
+
+small {
+  font-size: 12px;
+}
+
+.article-user-name {
+  font-size: 18px;
+}
+
+.logged-user-name {
+  color: #a4a4a8;
+}
+
+.table>:not(:first-child) {
+  border: none;
+}
+
+td, th {
+  max-width: 20px !important;
+  border-bottom-width: 0;
+}
+
+.table>:not(caption)>*>* {
+  border-bottom-width: 0px;
+}
+.post-title-width {
+  max-width: 100px !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#sidenav-collapse-main {
+  z-index: 0 !important;
+  position: relative;
+}
+
+.alert-messages {
+  z-index: 20000 !important;
+  position: fixed;
+}
+
+.alert-messages > .alert {
+  /* margin-right: 12px; */
+  padding-right: 20px !important;
+  padding-left: 20px !important;
 }

@@ -64,7 +64,8 @@ class UpdateAccountForm(FlaskForm):
     username = StringField('Username',
                            validators=[
                                DataRequired(),
-                               Length(min=2, max=20)
+                               Length(min=2, max=20),
+                               Regexp('^\w+$', message="Username must contain only letters, numbers or underscore"),
                            ])
     email = StringField('Email',
                         validators=[
@@ -108,11 +109,11 @@ class UpdateAccountForm(FlaskForm):
             raise ValidationError('Enter New Password also to change password or leave Password blank')
 
 class PostForm(FlaskForm):
-    title = StringField('Title', validators=[DataRequired()])
-    description = TextAreaField('Description', validators=[DataRequired()])
+    title = StringField('Title', validators=[DataRequired(), Length(max=100),])
+    description = TextAreaField('Description', validators=[DataRequired(), Length(max=50),])
     content = TextAreaField('Content', validators=[DataRequired()])
     picture = FileField('Add a picture', validators=[FileAllowed(['jpg', 'jpeg', 'png', 'webp', 'jfif'])])
     submit = SubmitField('Post')
 
 class SearchPostForm(FlaskForm):
-    search_term = StringField('Search Term', render_kw={"placeholder": "search posts by title"})
+    search_term = StringField('Search Term', render_kw={"placeholder": "search by title"})

@@ -1,0 +1,71 @@
+<nav class="sidenav navbar navbar-vertical navbar-expand-xs navbar-light bg-white mt-6 mb-2" id="sidenav-main">
+  <div class="scrollbar-inner">
+    <div class="navbar-inner">
+      <!-- Collapse -->
+      <div class="collapse navbar-collapse" id="sidenav-collapse-main">
+        <!-- Nav items -->
+        <ul class="navbar-nav">
+          {% if current_user.is_admin == True %}
+          <li class="nav-item">
+            <a class="nav-link {% if 'index' in segment %} active {% endif %}" href="{{ url_for('approvals') }}">
+              <i class="ni ni-tv-2 text-primary"></i>
+              <span class="nav-link-text">Approval Posts</span>
+            </a>
+          </li>
+          {% endif %}
+          {% if current_user.is_blogger == True %}
+          <li class="nav-item">
+            <a class="nav-link {% if 'index' in segment %} active {% endif %}" href="{{ url_for('new_post') }}">
+              <i class="ni ni-cloud-upload-96 text-primary"></i>
+              <span class="nav-link-text">New Post</span>
+            </a>
+          </li>
+          {% endif %}
+          <li class="nav-item">
+            <a class="nav-link {% if 'tables' in segment %} active {% endif %}" href="{{ url_for('home') }}">
+              <i class="ni ni-single-copy-04 text-green"></i>
+              <span class="nav-link-text">All Posts</span>
+            </a>
+          </li>
+          {% if current_user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link {% if 'profile' in segment %} active {% endif %}" href="{{ url_for('account') }}">
+              <i class="ni ni-single-02 text-yellow"></i>
+              <span class="nav-link-text">My Profile</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('logout') }}">
+              <i class="ni ni-user-run text-red"></i>
+              <span class="nav-link-text">Logout</span>
+            </a>
+          </li>            
+          {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('login') }}">
+              <i class="ni ni-key-25 text-info"></i>
+              <span class="nav-link-text">Login </span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('register') }}">
+              <i class="ni ni-circle-08 text-pink"></i>
+              <span class="nav-link-text">Register </span>
+            </a>
+          </li>
+          {% endif %}          
+        </ul>
+        <!-- Divider -->
+        <hr class="my-3">
+        <!-- Heading -->
+        <h6 class="navbar-heading p-0 text-muted">
+          <span class="docs-normal">to be added ...</span>
+        </h6>
+        <!-- Navigation -->
+        <ul class="navbar-nav mb-md-3">
+
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>

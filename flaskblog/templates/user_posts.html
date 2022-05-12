@@ -13,14 +13,14 @@
                             class="rounded-circle account-img">
                         
                         <div>
-                            <a class="d-block" mr-2" href="{{ url_for('user_posts', username=post.author.username) }}">{{ post.author.username }}</a>
-                            <small class="d-block text-muted">{{ post.date_posted.strftime('%B %d, %Y') }}</small>                    
+                            <a class="d-block" href="{{ url_for('user_posts', username=post.author.username) }}">{{ post.author.username }}</a>
+                            <small class="d-block text-muted"> Posted On {{ post.date_posted.strftime('%B %d, %Y') }}</small>                    
                         </div>
                     </div>
                 </div>
                 
                 <h2>
-                    <a class="article-title" href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a>
+                    <a class="article-title" href="{{ url_for('post', slug=slug(post)) }}">{{ post.title }}</a>
                 </h2>
 
                 <p class="article-content">{{ post.content }}</p>

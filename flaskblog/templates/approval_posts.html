@@ -1,85 +1,98 @@
 {% extends "layout.html" %}
 {% block content %}
-    {% if posts.items %}
-        {% for post in posts.items %}
-        <article class="media content-section">
-            <div class="media-body">
-                <div class="article-metadata d-flex justify-content-between mt-2">
-                    <div class="d-flex">
-                        <img src="{{ url_for('static', filename='profile_pics/' + post.author.image_file) }}" alt=""
-                            class="rounded-circle account-img">
-                        
-                        <div>
-                            <a class="d-block" mr-2" href="{{ url_for('user_posts', username=post.author.username) }}">{{
-                                post.author.username }}
-                            </a>
-                            
-                            <small class="d-block text-muted"> {{ post.date_posted.strftime('%B %d, %Y') }} </small>
-                        </div>
-                    </div>
-
-                    {% if current_user.is_admin == True %}
-                        <form action="{{ url_for('approve_post', post_id=post.id) }}" method="post">
-                            <div>
-                                <button type="submit" class="btn btn-outline-primary buttons mt-2"">
-                                    <i class="bi bi-check2-square">
-                                        Approve
-                                    </i>
-                                </button>
-                                
-                                <button type="button" class="btn btn-outline-primary buttons mt-2" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                                    <i class="bi bi-trash">
-                                        Delete
-                                    </i>
-                                </button>
-                            </div>
-                        </form>
-                    {% endif %}
+<!-- Page content -->
+<div class="container-fluid px-2">
+    <div class="row">
+        <div class="col p-0">
+            <div class="card">
+                <!-- Card header -->
+                <div class="card-header border-0">
+                    <h3 class="mb-0">Approval posts </h3>
                 </div>
-                
-                <h2>
-                    <a class="article-title" href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a>
-                </h2>
-                
-                <p class="article-content post-preview">{{ post.content }}</p>
-            </div>
-        </article>
+                <!-- Light table -->
+                <div class="table-responsive">
+                    <table class="table align-items-center table-flush">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col" class="sort" data-sort="name">Post Title</th>
+                                <th scope="col" class="sort" data-sort="status">Blogger</th>
+                                <th scope="col">status</th>
+                                <th scope="col" class="sort text-center" data-sort="completion">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="flex">
+                            {% if posts.items != [] %}
+                            {% for post in posts.items %}
+                            <tr>
+                                <td class="post-title-width py-0">
+                                    <a href="{{ url_for('post', slug=slug(post)) }}" title="{{ post.title }}"
+                                        class="font-weight-normal">
+                                        {{ post.title }}
+                                    </a>
+                                </td>
+                                <td class="py-0">
+                                    <span class="status">{{ post.author.username }}</span>
+                                </td>
+                                <td class="py-0">
+                                    <span class="status">
+                                        {% if post.is_approved == True%}
+                                        Approved
+                                        {% else %}
+                                        Pending
+                                        {% endif %}
+                                    </span>
+                                </td>
+                                <td class="text-center py-0">
+                                    {% if current_user.is_admin == True %}
+                                    <form action="{{ url_for('approve_post', post_id=post.id) }}" method="post">
+                                        <div>
+                                            {% if post.is_approved == False %}
+                                            <button type="submit" class="btn btn-outline-primary buttons p-0 mt-2"">
+                                                        <i title=" Approve post" class=" bi bi-check2-square"></i>
+                                            </button>
+                                            {% endif %}
+                                            <button type="button" class="btn btn-outline-primary buttons p-0 mt-2"
+                                                data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                                <i title="Delete post" class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
 
-            <!-- Delete Post Modal -->
-            <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel"
-            aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="deleteModalLabel">Delete Post</h5>
-                        </div>
-
-                        <div class="modal-body">
-                            <p> Are you sure you want to delete this post? </p>
-                        </div>
-                        
-                        <div class="modal-footer">
-                            <form action="{{ url_for('delete_post', post_id=post.id) }}" method="post">
-                                <input type="submit" class="btn btn-outline-secondary" value="Delete">
-                            </form>
-                        </div>
-                    </div>
+                <!-- Card footer -->
+                <div class="card-footer m-0 p-0">
+                    <nav class="p-2" aria-label="...">
+                        <ul class="pagination justify-content-end mb-0">
+                            {% for page_num in posts.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                                {% if page_num %}
+                                    {% if posts.page == page_num %}
+                                        <li class="page-item active">
+                                            <a class="page-link" href="{{ url_for('approvals', page=page_num) }}">{{ page_num }}</a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ url_for('approvals', page=page_num) }}">{{ page_num }}<span class="sr-only">(current)</span></a>
+                                        </li>
+                                    {% endif %}
+                                {% else %}
+                                <li class="page-item  disabled">
+                                    <a class="page-link""> ... </a>
+                                </li>
+                                    
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </nav>
                 </div>
             </div>
-        {% endfor %}
-    {% else %}
-        <p>No post to approve...</p>
-    {% endif %}
-    
-    {% for page_num in posts.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
-        {% if page_num %}
-            {% if posts.page == page_num %}
-                <a class="btn btn-primary mb-4" href="{{ url_for('approvals', page=page_num) }}">{{ page_num }}</a>
-            {% else %}
-                <a class="btn btn-outline-primary mb-4" href="{{ url_for('approvals', page=page_num) }}">{{ page_num }}</a>
-            {% endif %}
-        {% else %}
-            ...
-        {% endif %}
-    {% endfor %}
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -8,26 +8,22 @@
                         class="rounded-circle account-img">
                     
                     <div>
-                        <a class="d-block" mr-2" href="{{ url_for('user_posts', username=post.author.username) }}">
+                        <a class="d-block article-user-name" mr-2" href="{{ url_for('user_posts', username=post.author.username) }}">
                             {{ post.author.username }}
                         </a>
                         
-                        <small class="d-block text-muted"> {{ post.date_posted.strftime('%B %d, %Y') }} </small>                    
+                        <small class="d-block text-muted"> Posted On {{ post.date_posted.strftime('%B %d, %Y') }} </small>                    
                     </div>
                 </div>
                 
                 {% if post.author == current_user %}
                     <div>
-                        <a href="{{ url_for('update_post', post_id=post.id) }}" class="btn btn-outline-primary buttons mt-2">
-                            <i class="bi bi-pencil-square">
-                                Update
-                            </i>    
+                        <a href="{{ url_for('update_post', post_title=post.title) }}" class="btn btn-outline-success mt-2">
+                            <i class="bi bi-pencil-square"></i> Update    
                         </a>
                         
-                        <button type="button" class="btn btn-outline-primary buttons mt-2" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                            <i class="bi bi-trash">
-                                Delete
-                            </i>
+                        <button type="button" class="btn btn-outline-danger mt-2" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                            <i class="bi bi-trash"></i> Delete
                         </button>
                     </div>
                 {% endif %}
@@ -37,33 +33,43 @@
             
             <small class="article-title text-muted">{{ post.description }}</small>
             
-            <div class="card  my-2">
-                {% if post.image_file %}
+            {% if post.image_file %}
+                <div class="card">
                     <img class="card-img-top" src="{{ url_for('static', filename='posts_pictures/' + post.image_file) }}" alt="">
-                {% endif %}
-            </div>
-            
-            <p class="article-content">{{ post.content }}</p>
-
-            {% if current_user.is_authenticated %}
-                {% if current_user.has_liked_post(post) %}
-                    <a class="btn btn-outline-primary buttons"
-                        href="{{ url_for('react_to_post', post_id=post.id, reaction='unlike') }}">
-                            
-                        <i class="bi bi-heart-fill">
-                            {{ post.likes.count() }} likes
-                        </i>
-                    </a>
-                {% else %}
-                    <a class="btn btn-outline-primary buttons"
-                        href="{{ url_for('react_to_post', post_id=post.id, reaction='like') }}">
-                            
-                        <i class="bi bi-heart">
-                            {{ post.likes.count() }} likes
-                        </i>
-                    </a>
-                {% endif %}
+                </div>
             {% endif %}
+            
+            <p class="article-content mt-2">{{ post.content }}</p>
+
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="post-like">
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.has_liked_post(post) %}
+                            <a class="btn btn-outline-danger buttons"
+                                href="{{ url_for('react_to_post', post_id=post.id, reaction='unlike') }}">
+                                
+                                <i class="bi bi-heart-fill"></i> {{ post.likes.count() }}
+                            </a>
+                        {% else %}
+                            <a class="btn btn-outline-danger buttons"
+                                href="{{ url_for('react_to_post', post_id=post.id, reaction='like') }}">
+                                
+                                <i class="bi bi-heart"></i> {{ post.likes.count() }}
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <a class="btn btn-outline-danger buttons"
+                            href="#">
+                            <i class="bi bi-heart"></i> {{ post.likes.count() }}
+                        </a>
+                    {% endif %}
+                </div>
+                <div class="post-view">
+                    <span class="link-primary">                            
+                        <i class="bi bi-eye"></i> {{ post.views.count() }}
+                    </span>
+                </div>
+            </div>
         </div>
     </article>
 

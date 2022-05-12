@@ -26,3 +26,16 @@ def search_posts():
         posts = Post.query.filter(Post.title.like(searchPostForm.search_term.data)).order_by(Post.date_posted.desc()).paginate(page=page, per_page=5)
 
     return render_template('home.html', posts=posts, searchPostForm=searchPostForm)
+
+<!-- paginations -->
+{% for page_num in posts.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+        {% if page_num %}
+            {% if posts.page == page_num %}
+                <a class="btn btn-primary mb-4" href="{{ url_for('approvals', page=page_num) }}">{{ page_num }}</a>
+            {% else %}
+                <a class="btn btn-outline-primary mb-4" href="{{ url_for('approvals', page=page_num) }}">{{ page_num }}</a>
+            {% endif %}
+        {% else %}
+            ...
+        {% endif %}
+    {% endfor %}

@@ -3,9 +3,10 @@ import os
 from fileinput import filename
 from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
+from sqlalchemy import null
 from flaskblog import app, db, bcrypt
 from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm, SearchPostForm
-from flaskblog.models import User, Post, PostLike
+from flaskblog.models import PostView, User, Post, PostLike
 from flask_login import login_user, current_user, logout_user, login_required
 
 @app.route("/register", methods=['GET', 'POST'])
@@ -22,7 +23,9 @@ def register():
         db.session.commit()
         flash('Your account has been created successfully!', 'success')
         return redirect(url_for('login'))
-    return render_template('register.html', title='Register', form=form)
+    searchPostForm = SearchPostForm() 
+    
+    return render_template('register.html', title='Register', form=form, searchPostForm=searchPostForm)
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
@@ -37,7 +40,8 @@ def login():
             return redirect(next_page) if next_page else redirect(url_for('home'))
         else:
             flash('Login Unsuccessfull. Please check username and password', 'danger')
-    return render_template('login.html', title='Login', form=form)
+    searchPostForm = SearchPostForm() 
+    return render_template('login.html', title='Login', form=form, searchPostForm=searchPostForm)
 
 @app.route("/logout",)
 def logout():
@@ -99,14 +103,26 @@ def account():
         form.username.data = current_user.username
         form.email.data = current_user.email
     user_avatar = url_for('static', filename='profile_pics/' + current_user.image_file)
-    return render_template('account.html', title='Account', user_avatar=user_avatar, form=form)
+    searchPostForm = SearchPostForm() 
+    return render_template('account.html', title='Account', user_avatar=user_avatar, form=form, searchPostForm=searchPostForm)
 
 @app.route("/")
 @app.route("/home")
 def home():
     page = request.args.get('page', 1, type=int)
     posts = Post.query.filter_by(is_approved=True).order_by(Post.date_posted.desc()).paginate(page=page, per_page=5)
-    return render_template('home.html', posts=posts)
+
+    searchPostForm = SearchPostForm()
+    return render_template('home.html', posts=posts, searchPostForm=searchPostForm)
+
+@app.route("/search_posts", methods=['GET', 'POST'])
+def search_posts():
+    searchPostForm = SearchPostForm()
+    if searchPostForm.validate_on_submit():
+        page = request.args.get('page', 1, type=int)
+        posts = Post.query.filter(Post.title.like("%" + searchPostForm.search_term.data + "%")).order_by(Post.date_posted.desc()).paginate(page=page, per_page=5)
+
+    return render_template('home.html', posts=posts, searchPostForm=searchPostForm)
 
 @app.route("/user/<string:username>")
 def user_posts(username):
@@ -115,7 +131,9 @@ def user_posts(username):
     posts = Post.query.filter_by(author=user)\
                 .order_by(Post.date_posted.desc())\
                 .paginate(page=page, per_page=5)
-    return render_template('user_posts.html', posts=posts, user=user)
+
+    searchPostForm = SearchPostForm()
+    return render_template('user_posts.html', posts=posts, user=user, searchPostForm=searchPostForm)
 
 def save_post_picture(form_picture):
     random_hex = secrets.token_hex(8)
@@ -141,25 +159,40 @@ def new_post():
         db.session.commit()
         flash('Your post has been created!', 'success')
         return redirect(url_for('home'))
+
+    searchPostForm = SearchPostForm()
     return render_template('create_post.html', title='New Post', 
-        form=form, legend='Create Post')
+        form=form, legend='Create Post', searchPostForm=searchPostForm)
 
-@app.route("/post/<int:post_id>")
-def post(post_id):
-    post = Post.query.get_or_404(post_id)
-    return render_template('post.html', title=post.title, post=post)
+@app.route("/post/<string:slug>")
+def post(slug):
+    id = int(slug.split('-')[-1])
+    post = Post.query.filter_by(id=id).first_or_404()
 
-@app.route("/post/<int:post_id>/update", methods=['GET', 'POST'])
+    # check if user is already in postView table
+    post_view = PostView.query.filter_by(post_id=post.id, user_id=current_user.id).count()
+
+    # add a user to the post's view table if not added already
+    if post_view == 0:
+        post_view = PostView(post_id=post.id, user_id=current_user.id)
+        db.session.add(post_view)
+        db.session.commit()
+
+    searchPostForm = SearchPostForm()    
+    return render_template('post.html', title=post.title, post=post, searchPostForm=searchPostForm)
+
+@app.route("/post/<string:post_title>/update", methods=['GET', 'POST'])
 @login_required
-def update_post(post_id):
-    post = Post.query.get_or_404(post_id)
+def update_post(post_title):
+    post = Post.query.filter_by(title=post_title).first_or_404(post_title)
     if post.author != current_user:
         abort(403)
     form = PostForm()
     if form.validate_on_submit():
-        if form.picture.data and post.image_file:
-            pictures_path = os.path.join(app.root_path, 'static/posts_pictures', post.image_file)
-            os.remove(pictures_path)
+        if form.picture.data:
+            if post.image_file:
+                pictures_path = os.path.join(app.root_path, 'static/posts_pictures', post.image_file)
+                os.remove(pictures_path)
             picture_file = save_post_picture(form.picture.data)
             post.image_file = picture_file
         post.title = form.title.data
@@ -167,19 +200,21 @@ def update_post(post_id):
         post.content = form.content.data
         db.session.commit()
         flash('Your post has been updated!', 'success')
-        return redirect(url_for('post', post_id=post.id))
+        return redirect(url_for('post', slug=(post.title + '-' + str(post.id))))
     elif request.method == 'GET':
         form.title.data = post.title
         form.description.data = post.description
         form.content.data = post.content
         form.submit.label.text = 'Update'
+
+    searchPostForm = SearchPostForm() 
     return render_template('create_post.html', title='Update Post', 
-        form=form, legend='Update Post')
+        form=form, legend='Update Post', post_title=post.title, searchPostForm=searchPostForm)
 
 @app.route("/post/<int:post_id>/delete", methods=['POST'])
 @login_required
 def delete_post(post_id):
-    post = Post.query.get_or_404(post_id)
+    post = Post.query.filter_by(id=post_id).first_or_404()
     if post.author != current_user and current_user.is_admin != True:
         abort(403)
     if post.image_file:
@@ -195,18 +230,20 @@ def delete_post(post_id):
 def approvals():
     page = request.args.get('page', 1, type=int)
     posts = Post.query.filter_by(is_approved=False).order_by(Post.date_posted.desc()).paginate(page=page, per_page=5)
-    return render_template('approval_posts.html', posts=posts)
+
+    searchPostForm = SearchPostForm()
+    return render_template('approval_posts.html', posts=posts, searchPostForm=searchPostForm)
     
 @app.route("/post/<int:post_id>/approve", methods=['GET', 'POST'])
 @login_required
 def approve_post(post_id):
-    post = Post.query.get_or_404(post_id)
+    post = Post.query.filter_by(id=post_id).first_or_404(post_id)
     form = PostForm()
     post.is_approved = True
     db.session.commit()
     flash('Post has been approved!', 'success')
     return redirect(url_for('approvals'))
-
+    
 @app.route('/like/<int:post_id>/<reaction>')
 @login_required
 def react_to_post(post_id, reaction):
@@ -219,3 +256,9 @@ def react_to_post(post_id, reaction):
         db.session.commit()
     return redirect(request.referrer)
 
+@app.context_processor
+def utility_processor():
+    # Generate slug from post title and id
+    def slug(post):
+        return post.title.replace(' ', '-') + '-' + str(post.id)
+    return dict(slug=slug)
