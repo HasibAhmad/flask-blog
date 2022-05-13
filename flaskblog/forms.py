@@ -2,6 +2,7 @@ from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
+from flask_ckeditor import CKEditorField
 from wtforms.validators import DataRequired, Length, EqualTo, Email, ValidationError, Regexp, Optional
 from flaskblog.models import User
 
@@ -111,7 +112,7 @@ class UpdateAccountForm(FlaskForm):
 class PostForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired(), Length(max=100),])
     description = TextAreaField('Description', validators=[DataRequired(), Length(max=50),])
-    content = TextAreaField('Content', validators=[DataRequired()])
+    content = CKEditorField('Content', validators=[DataRequired()])
     picture = FileField('Add a picture', validators=[FileAllowed(['jpg', 'jpeg', 'png', 'webp', 'jfif'])])
     submit = SubmitField('Post')
 

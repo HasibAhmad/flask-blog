@@ -70,17 +70,20 @@ a.article-title:hover {
   text-decoration: none;
 }
 
-.article-content {
-  white-space: pre-line;
+.article-content-preview {
+  max-height: 114px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  margin-bottom: 8px;
 }
 
-.article-content.post-preview {
+/* .article-content .post-preview {
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 3; /* number of lines to show */
+  -webkit-line-clamp: 3; 
   -webkit-box-orient: vertical;
-}
+} */
 
 .article-img {
   height: 65px;
@@ -135,6 +138,28 @@ a.article-title:hover {
   border: none;
 }
 
+.btn-sm {
+  box-shadow: none;
+}
+
+.btn:hover {
+  color: rgb(51, 51, 51)
+}
+
+.custom-btn:hover {
+  border: none;
+  box-shadow: none;
+  background-color: white;
+}
+
+.custom-btn-success:hover {
+  color: lightgreen;
+}
+
+.custom-btn-danger:hover {
+  color: red;
+}
+
 .btn-outline-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active, .open>.dropdown-toggle.btn-primary {
     color: rgb(70, 0, 255);
     background-color: #eff0f3;
@@ -155,20 +180,24 @@ small {
 
 .logged-user-name {
   color: #a4a4a8;
+  font-size: 14px;
 }
 
 .table>:not(:first-child) {
   border: none;
 }
 
-td, th {
-  max-width: 20px !important;
+.approve-table-columns {
+  /* max-width: 40px !important; */
   border-bottom-width: 0;
+  padding-left: 2px !important;
+  padding-right: 2px !important;
 }
 
 .table>:not(caption)>*>* {
   border-bottom-width: 0px;
 }
+
 .post-title-width {
   max-width: 100px !important;
   overflow: hidden;
@@ -183,10 +212,35 @@ td, th {
 .alert-messages {
   z-index: 20000 !important;
   position: fixed;
+  max-width: 250.5px;
+  height: max-content !important;
 }
 
 .alert-messages > .alert {
-  /* margin-right: 12px; */
-  padding-right: 20px !important;
-  padding-left: 20px !important;
+  padding: 20px !important;
+}
+
+.card-img-top {
+  height: 240px;
+}
+
+i {
+  font-size: 12px;
+}
+
+#sidenav-main {
+  box-shadow: none;
+  border: 1px solid #dddddd;
+}
+
+.post-views-icon {
+  color: #2dce89;
+}
+
+/* code snippet highlight */
+pre {
+  border: 1px solid #dddddd;
+  border-radius: 3px;
+  padding: 10px;
+  background-color: #e2e2e2;
 }

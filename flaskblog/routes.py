@@ -21,7 +21,7 @@ def register():
             user.is_blogger = True
         db.session.add(user)
         db.session.commit()
-        flash('Your account has been created successfully!', 'success')
+        flash('Account has been created. Please login!.', 'success')
         return redirect(url_for('login'))
     searchPostForm = SearchPostForm() 
     
@@ -102,9 +102,29 @@ def account():
     elif request.method == 'GET':
         form.username.data = current_user.username
         form.email.data = current_user.email
+
+    user_posts = Post.query.filter_by(author=current_user)
+    total_posts = user_posts.count()        
+    total_post_likes = 0
+    total_post_views = 0
+    
+    for user_post in user_posts:
+        total_post_likes += user_post.likes.count()
+        total_post_views += user_post.views.count()
+    
     user_avatar = url_for('static', filename='profile_pics/' + current_user.image_file)
     searchPostForm = SearchPostForm() 
-    return render_template('account.html', title='Account', user_avatar=user_avatar, form=form, searchPostForm=searchPostForm)
+    return render_template(
+                            'account.html', 
+                            title='Account', 
+                            user_avatar=user_avatar, 
+                            form=form, 
+                            searchPostForm=searchPostForm,
+                            total_posts=total_posts,
+                            total_post_likes=total_post_likes,
+                            total_post_views=total_post_views,
+                            user=current_user
+                            )
 
 @app.route("/")
 @app.route("/home")
@@ -169,14 +189,14 @@ def post(slug):
     id = int(slug.split('-')[-1])
     post = Post.query.filter_by(id=id).first_or_404()
 
-    # check if user is already in postView table
-    post_view = PostView.query.filter_by(post_id=post.id, user_id=current_user.id).count()
-
-    # add a user to the post's view table if not added already
-    if post_view == 0:
-        post_view = PostView(post_id=post.id, user_id=current_user.id)
-        db.session.add(post_view)
-        db.session.commit()
+    # check if user is authenticated and already in postView table
+    if current_user.is_authenticated:
+        post_view = PostView.query.filter_by(post_id=post.id, user_id=current_user.id).count()
+        # add a user to the post's view table if not added already
+        if post_view == 0:
+            post_view = PostView(post_id=post.id, user_id=current_user.id)
+            db.session.add(post_view)
+            db.session.commit()
 
     searchPostForm = SearchPostForm()    
     return render_template('post.html', title=post.title, post=post, searchPostForm=searchPostForm)
@@ -205,11 +225,11 @@ def update_post(post_title):
         form.title.data = post.title
         form.description.data = post.description
         form.content.data = post.content
-        form.submit.label.text = 'Update'
+        form.submit.label.text = 'Save'
 
     searchPostForm = SearchPostForm() 
-    return render_template('create_post.html', title='Update Post', 
-        form=form, legend='Update Post', post_title=post.title, searchPostForm=searchPostForm)
+    return render_template('create_post.html', title='Save', 
+        form=form, legend='Edit post', post_title=post.title, searchPostForm=searchPostForm)
 
 @app.route("/post/<int:post_id>/delete", methods=['POST'])
 @login_required
@@ -229,7 +249,11 @@ def delete_post(post_id):
 @login_required
 def approvals():
     page = request.args.get('page', 1, type=int)
-    posts = Post.query.filter_by(is_approved=False).order_by(Post.date_posted.desc()).paginate(page=page, per_page=5)
+
+    if current_user.is_admin == True:
+        posts = Post.query.filter_by(is_approved=False).order_by(Post.is_approved.asc()).order_by(Post.date_posted.desc()).paginate(page=page, per_page=5)
+    else:
+        posts = Post.query.filter_by(user_id=current_user.id).order_by(Post.is_approved.asc()).order_by(Post.date_posted.desc()).paginate(page=page, per_page=5)
 
     searchPostForm = SearchPostForm()
     return render_template('approval_posts.html', posts=posts, searchPostForm=searchPostForm)
@@ -262,3 +286,28 @@ def utility_processor():
     def slug(post):
         return post.title.replace(' ', '-') + '-' + str(post.id)
     return dict(slug=slug)
+
+@app.route("/user_profile/<int:user_id>", methods=['GET', 'POST'])
+def user_profile(user_id):
+    user = User.query.filter_by(id=user_id).first_or_404()
+    user_posts = Post.query.filter_by(user_id=user_id)
+    total_posts = user_posts.count()        
+    total_post_likes = 0
+    total_post_views = 0
+    
+    for user_post in user_posts:
+        total_post_likes += user_post.likes.count()
+        total_post_views += user_post.views.count()
+    
+    user_avatar = url_for('static', filename='profile_pics/' + user.image_file)
+    searchPostForm = SearchPostForm() 
+    return render_template(
+                            'account.html', 
+                            title='Account', 
+                            user=user,
+                            user_avatar=user_avatar, 
+                            searchPostForm=searchPostForm,
+                            total_posts=total_posts,
+                            total_post_likes=total_post_likes,
+                            total_post_views=total_post_views,
+                            )

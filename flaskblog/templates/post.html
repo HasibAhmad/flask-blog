@@ -8,7 +8,7 @@
                         class="rounded-circle account-img">
                     
                     <div>
-                        <a class="d-block article-user-name" mr-2" href="{{ url_for('user_posts', username=post.author.username) }}">
+                        <a class="d-block article-user-name" mr-2" href="{{ url_for('user_profile', user_id=post.author.id) }}">
                             {{ post.author.username }}
                         </a>
                         
@@ -17,57 +17,75 @@
                 </div>
                 
                 {% if post.author == current_user %}
-                    <div>
-                        <a href="{{ url_for('update_post', post_title=post.title) }}" class="btn btn-outline-success mt-2">
-                            <i class="bi bi-pencil-square"></i> Update    
+                    <div class="d-flex align-items-center pb-2">
+                        <a href="{{ url_for('update_post', post_title=post.title) }}" class="btn btn-sm btn-success">
+                            <i class="bi bi-pencil-square mr-0"></i> 
+                            <span class="">
+                                Edit
+                            </span>    
                         </a>
                         
-                        <button type="button" class="btn btn-outline-danger mt-2" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                            <i class="bi bi-trash"></i> Delete
+                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                            <i class="bi bi-trash mr-0"></i> 
+                            <span>
+                                Delete
+                            </span>
                         </button>
                     </div>
                 {% endif %}
             </div>
             
-            <h2 class="article-title">{{ post.title }}</h2>
+            <h2 class="article-title h5 pt-2">{{ post.title }}</h2>
             
-            <small class="article-title text-muted">{{ post.description }}</small>
+            <div class="article-title text-muted pb-3">{{ post.description }}</div>
             
             {% if post.image_file %}
                 <div class="card">
                     <img class="card-img-top" src="{{ url_for('static', filename='posts_pictures/' + post.image_file) }}" alt="">
                 </div>
             {% endif %}
-            
-            <p class="article-content mt-2">{{ post.content }}</p>
+
+            {{ post.content | safe }}
 
             <div class="d-flex justify-content-between align-items-center">
                 <div class="post-like">
                     {% if current_user.is_authenticated %}
                         {% if current_user.has_liked_post(post) %}
-                            <a class="btn btn-outline-danger buttons"
+                            <a class="btn-sm btn-outline-danger buttons"
                                 href="{{ url_for('react_to_post', post_id=post.id, reaction='unlike') }}">
                                 
-                                <i class="bi bi-heart-fill"></i> {{ post.likes.count() }}
+                                <i class="bi bi-heart-fill"></i>
+                                <span>
+                                    {{ post.likes.count() }}
+                                </span>    
                             </a>
                         {% else %}
-                            <a class="btn btn-outline-danger buttons"
+                            <a class="btn-sm btn-outline-danger buttons"
                                 href="{{ url_for('react_to_post', post_id=post.id, reaction='like') }}">
                                 
-                                <i class="bi bi-heart"></i> {{ post.likes.count() }}
+                                <i class="bi bi-heart"></i> 
+                                <span>
+                                    {{ post.likes.count() }}
+                                </span>    
                             </a>
                         {% endif %}
                     {% else %}
-                        <a class="btn btn-outline-danger buttons"
+                        <a class="btn-sm btn-outline-danger buttons"
                             href="#">
-                            <i class="bi bi-heart"></i> {{ post.likes.count() }}
+                            <i class="bi bi-heart"></i> 
+                            <span>
+                                {{ post.likes.count() }}
+                            </span>    
                         </a>
                     {% endif %}
                 </div>
                 <div class="post-view">
-                    <span class="link-primary">                            
-                        <i class="bi bi-eye"></i> {{ post.views.count() }}
-                    </span>
+                    <div class="link-success post-views-icon">                            
+                        <i class="bi bi-graph-up-arrow"></i>
+                        <span>
+                            {{ post.views.count() }}
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -94,4 +112,6 @@
             </div>
         </div>
     </div>
+    <script src='/static/assets/ckeditor/codesnippet/lib/highlight/highlight.pack.js'></script>
+    <script>hljs.initHighlightingOnLoad();</script>
 {% endblock %}

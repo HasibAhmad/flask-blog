@@ -10,7 +10,7 @@
                 {{ form.title.label(class="form-control-label") }}
                 
                 {% if form.title.errors %}
-                    {{ form.title(class="form-control form-control-lg is-invalid") }}
+                    {{ form.title(class="form-control is-invalid") }}
                     <div class="invalid-feedback">
                         {% for error in form.title.errors %}
                             <span>
@@ -19,7 +19,7 @@
                         {% endfor %}
                     </div>
                 {% else %}
-                    {{ form.title(class="form-control form-control-lg") }}
+                    {{ form.title(class="form-control") }}
                 {% endif %}
             </div>
             
@@ -27,7 +27,7 @@
                 {{ form.description.label(class="form-control-label") }}
                 
                 {% if form.description.errors %}
-                    {{ form.description(class="form-control form-control-lg is-invalid") }}
+                    {{ form.description(class="form-control is-invalid") }}
                     <div class="invalid-feedback">
                         {% for error in form.description.errors %}
                             <span>
@@ -36,7 +36,7 @@
                         {% endfor %}
                     </div>
                 {% else %}
-                    {{ form.description(class="form-control form-control-lg") }}
+                    {{ form.description(class="form-control") }}
                 {% endif %}
             </div>
             
@@ -44,7 +44,7 @@
                 {{ form.content.label(class="form-control-label") }}
                 
                 {% if form.content.errors %}
-                    {{ form.content(class="form-control form-control-lg is-invalid") }}
+                    {{ form.content(class="form-control is-invalid") }}
                     <div class="invalid-feedback">
                         {% for error in form.content.errors %}
                             <span>
@@ -53,7 +53,7 @@
                         {% endfor %}
                     </div>
                 {% else %}
-                    {{ form.content(class="form-control form-control-lg") }}
+                    {{ form.content(class="form-control") }}
                 {% endif %}
             </div>
             
@@ -74,8 +74,11 @@
         </fieldset>
         
         <div class="form-group">
-            {{ form.submit(class="btn btn-outline-info my-2") }}
+            {{ form.submit(class="btn btn-success") }}
         </div>
     </form>
+
+    {{ ckeditor.load() }}
+    {{ ckeditor.config(name='content') }}
 </div>
 {% endblock %}

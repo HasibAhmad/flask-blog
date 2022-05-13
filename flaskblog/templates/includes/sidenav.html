@@ -2,14 +2,14 @@
   <div class="scrollbar-inner">
     <div class="navbar-inner">
       <!-- Collapse -->
-      <div class="collapse navbar-collapse" id="sidenav-collapse-main">
+      <div class="collapse navbar-collapse align-items-center" id="sidenav-collapse-main">
         <!-- Nav items -->
         <ul class="navbar-nav">
-          {% if current_user.is_admin == True %}
+          {% if current_user.is_blogger == True %}
           <li class="nav-item">
             <a class="nav-link {% if 'index' in segment %} active {% endif %}" href="{{ url_for('approvals') }}">
-              <i class="ni ni-tv-2 text-primary"></i>
-              <span class="nav-link-text">Approval Posts</span>
+              <i class="ni ni-check-bold text-primary"></i>
+              <span class="nav-link-text">Posts to review</span>
             </a>
           </li>
           {% endif %}

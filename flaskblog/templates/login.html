@@ -9,7 +9,7 @@
                 <div class="form-group mb-2">
                     {{ form.email.label(class="form-control-label") }}
                     {% if form.email.errors %}
-                        {{ form.email(class="form-control form-control-lg is-invalid") }}
+                        {{ form.email(class="form-control is-invalid") }}
                         
                         <div class="invalid-feedback">
                             {% for error in form.email.errors %}
@@ -19,14 +19,14 @@
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ form.email(class="form-control form-control-lg") }}
+                        {{ form.email(class="form-control") }}
                     {% endif %}   
                 </div>
                 
                 <div class="form-group mb-2">
                     {{ form.password.label(class="form-control-label") }}
                     {% if form.password.errors %}
-                        {{ form.password(class="form-control form-control-lg is-invalid") }}
+                        {{ form.password(class="form-control is-invalid") }}
                         
                         <div class="invalid-feedback">
                             {% for error in form.password.errors %}
@@ -36,7 +36,7 @@
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ form.password(class="form-control form-control-lg") }}
+                        {{ form.password(class="form-control") }}
                     {% endif %}   
                 </div>
                 
@@ -47,10 +47,10 @@
             </fieldset>
             
             <div class="form-group">
-                {{ form.submit(class="btn btn-outline-info my-2") }}
+                {{ form.submit(class="btn btn-success") }}
             </div>
             
-            <small class="text-muted">
+            <small class="text-muted mt-2">
                 <a href="#">Forgot Password?</a>
             </small>
         </form>
