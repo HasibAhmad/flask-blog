@@ -212,7 +212,7 @@ small {
 .alert-messages {
   z-index: 20000 !important;
   position: fixed;
-  max-width: 250.5px;
+  width: 250.5px !important;
   height: max-content !important;
 }
 
@@ -243,4 +243,8 @@ pre {
   border-radius: 3px;
   padding: 10px;
   background-color: #e2e2e2;
+}
+
+.card-profile-image img:hover {
+  transform: translate(-50%, -50%);
 }

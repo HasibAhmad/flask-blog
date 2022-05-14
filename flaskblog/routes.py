@@ -237,9 +237,17 @@ def delete_post(post_id):
     post = Post.query.filter_by(id=post_id).first_or_404()
     if post.author != current_user and current_user.is_admin != True:
         abort(403)
+    
     if post.image_file:
         pictures_path = os.path.join(app.root_path, 'static/posts_pictures', post.image_file)
         os.remove(pictures_path)
+
+    # remove post likes for all users on the postLike table
+    post_likes = PostLike.query.filter_by(post_id=post.id).delete()
+
+    # remove post views for all users on the postLike table
+    post_views = PostView.query.filter_by(post_id=post.id).delete()
+
     db.session.delete(post)
     db.session.commit()
     flash('Your post has been deleted!', 'success')
