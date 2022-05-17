@@ -160,10 +160,10 @@ a.article-title:hover {
   color: red;
 }
 
-.btn-outline-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active, .open>.dropdown-toggle.btn-primary {
+/* .btn-outline-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active, .open>.dropdown-toggle.btn-primary {
     color: rgb(70, 0, 255);
     background-color: #eff0f3;
-}
+} */
 
 .alert {
   padding-top: 21px;
